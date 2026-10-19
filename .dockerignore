@@ -1,0 +1,29 @@
+# Archivos que NO se envian al contexto de construccion de Docker.
+# Mantiene la imagen liviana y evita copiar artefactos locales.
+
+# Control de versiones e integracion continua
+.git
+.github
+.gitignore
+.gitattributes
+
+# Herramientas de construccion (dentro de la imagen ya hay Maven)
+.mvn
+mvnw
+mvnw.cmd
+target
+
+# IDEs
+.idea
+.vscode
+*.iml
+
+# Documentacion y propios archivos de Docker
+README.md
+HELP.md
+Dockerfile
+.dockerignore
+
+# Varios
+*.log
+.env

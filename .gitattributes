@@ -1,0 +1,14 @@
+# Normalizacion automatica de finales de linea para todos los textos
+* text=auto
+
+# El wrapper de Maven debe conservar LF en cualquier sistema operativo
+mvnw text eol=lf
+
+# Scripts de Windows siempre con CRLF
+mvnw.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binarios: nunca renormalizar
+*.jar binary
+*.png binary
+*.zip binary
