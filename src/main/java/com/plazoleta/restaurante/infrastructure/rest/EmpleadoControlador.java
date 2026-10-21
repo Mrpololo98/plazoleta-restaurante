@@ -3,6 +3,8 @@ package com.plazoleta.restaurante.infrastructure.rest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.plazoleta.restaurante.application.dto.PeticionVincularEmpleado;
 import com.plazoleta.restaurante.application.dto.RespuestaEmpleado;
+import com.plazoleta.restaurante.domain.api.ConsultarEmpleado;
 import com.plazoleta.restaurante.domain.api.VincularEmpleado;
 import com.plazoleta.restaurante.domain.model.Empleado;
 import com.plazoleta.restaurante.infrastructure.security.PortadorAutenticado;
@@ -31,11 +34,14 @@ import jakarta.validation.Valid;
 public class EmpleadoControlador {
 
     private final VincularEmpleado vincularEmpleado;
+    private final ConsultarEmpleado consultarEmpleado;
     private final ConversorEmpleadosRest conversor;
 
     public EmpleadoControlador(VincularEmpleado vincularEmpleado,
+                               ConsultarEmpleado consultarEmpleado,
                                ConversorEmpleadosRest conversor) {
         this.vincularEmpleado = vincularEmpleado;
+        this.consultarEmpleado = consultarEmpleado;
         this.conversor = conversor;
     }
 
@@ -57,5 +63,19 @@ public class EmpleadoControlador {
         Empleado vinculo = vincularEmpleado.ejecutar(
                 conversor.aSolicitud(peticion), peticion.idRestaurante(), portador.idUsuario());
         return ResponseEntity.status(HttpStatus.CREATED).body(conversor.aRespuesta(vinculo));
+    }
+
+    @Operation(summary = "Consulta el restaurante de un empleado",
+            description = "Devuelve el vínculo laboral de la cuenta: a qué restaurante pertenece. "
+                    + "Lo consulta el microservicio de pedidos para filtrar las órdenes que el "
+                    + "empleado puede ver y tocar (HU12 a HU15).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vínculo laboral encontrado"),
+            @ApiResponse(responseCode = "401", description = "Falta token de acceso"),
+            @ApiResponse(responseCode = "404", description = "La cuenta no es empleado de ningún restaurante")
+    })
+    @GetMapping("/{idUsuario}")
+    public ResponseEntity<RespuestaEmpleado> buscar(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(conversor.aRespuesta(consultarEmpleado.ejecutar(idUsuario)));
     }
 }

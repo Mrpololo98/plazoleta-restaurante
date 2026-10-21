@@ -2,9 +2,15 @@ package com.plazoleta.restaurante.infrastructure.persistence;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import com.plazoleta.restaurante.domain.model.HojaPlatos;
 import com.plazoleta.restaurante.domain.model.Plato;
+import com.plazoleta.restaurante.domain.model.TipoDePlato;
 import com.plazoleta.restaurante.domain.spi.RepositorioPlatosPuerto;
 
 /**
@@ -31,5 +37,18 @@ public class PersistenciaPlatosAdapter implements RepositorioPlatosPuerto {
     @Override
     public Optional<Plato> obtenerPorId(Long id) {
         return repositorioJpa.findById(id).map(conversor::aDominio);
+    }
+
+    @Override
+    public HojaPlatos listarCarta(Long idRestaurante, TipoDePlato categoria, int pagina, int cantidad) {
+        Pageable hoja = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
+        Page<PlatoEntidad> resultados = categoria == null
+                ? repositorioJpa.findByIdRestauranteAndActivoTrue(idRestaurante, hoja)
+                : repositorioJpa.findByIdRestauranteAndActivoTrueAndCategoria(idRestaurante, categoria, hoja);
+        return new HojaPlatos(
+                resultados.getContent().stream().map(conversor::aDominio).toList(),
+                resultados.getNumber(),
+                resultados.getSize(),
+                resultados.getTotalElements());
     }
 }

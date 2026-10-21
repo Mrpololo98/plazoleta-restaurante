@@ -1,5 +1,7 @@
 package com.plazoleta.restaurante.infrastructure.persistence;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.plazoleta.restaurante.domain.model.Empleado;
@@ -23,5 +25,12 @@ public class PersistenciaEmpleadosAdapter implements RepositorioEmpleadosPuerto 
         EmpleadoEntidad entidad = repositorioJpa.save(new EmpleadoEntidad(
                 empleado.id(), empleado.idUsuario(), empleado.idRestaurante()));
         return new Empleado(entidad.getId(), entidad.getIdUsuario(), entidad.getIdRestaurante());
+    }
+
+    @Override
+    public Optional<Empleado> obtenerPorIdUsuario(Long idUsuario) {
+        return repositorioJpa.findByIdUsuario(idUsuario)
+                .map(entidad -> new Empleado(
+                        entidad.getId(), entidad.getIdUsuario(), entidad.getIdRestaurante()));
     }
 }

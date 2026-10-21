@@ -1,5 +1,7 @@
 package com.plazoleta.restaurante.domain.spi;
 
+import java.util.Optional;
+
 import com.plazoleta.restaurante.domain.model.Empleado;
 
 /**
@@ -8,4 +10,10 @@ import com.plazoleta.restaurante.domain.model.Empleado;
 public interface RepositorioEmpleadosPuerto {
 
     Empleado guardar(Empleado empleado);
+
+    /**
+     * Busca el vínculo laboral de una cuenta de empleado; lo consulta el
+     * microservicio de pedidos para filtrar sus órdenes (HU12).
+     */
+    Optional<Empleado> obtenerPorIdUsuario(Long idUsuario);
 }

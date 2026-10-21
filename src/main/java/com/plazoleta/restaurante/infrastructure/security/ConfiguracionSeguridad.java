@@ -18,13 +18,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Seguridad HTTP del microservicio (parte restaurante de la HU5).
  *
- * - GET   /restaurantes  → público (HU9: cualquier visitante explora la plazoleta)
- * - POST  /restaurantes  → solo ADMIN (HU2)
- * - POST  /platos        → solo PROPIETARIO (HU3)
- * - PUT   /platos/**     → solo PROPIETARIO (HU4)
- * - PATCH /platos/**     → solo PROPIETARIO (HU7)
- * - POST  /empleados     → solo PROPIETARIO (HU6)
- * - Swagger y /error     → público
+ * - GET   /restaurantes y /restaurantes/** → público (HU9 y HU10: explorar
+ *   la plazoleta y leer la carta de cada restaurante; la ficha de un
+ *   establecimiento no es reservada)
+ * - GET   /platos/{id}    → público (integración: pedidos valida sus órdenes)
+ * - POST  /restaurantes   → solo ADMIN (HU2)
+ * - POST  /platos         → solo PROPIETARIO (HU3)
+ * - PUT   /platos/**      → solo PROPIETARIO (HU4)
+ * - PATCH /platos/**      → solo PROPIETARIO (HU7)
+ * - POST  /empleados      → solo PROPIETARIO (HU6)
+ * - GET   /empleados/{id} → autenticado (integración: pedidos resuelve el
+ *   restaurante de un empleado)
+ * - Swagger y /error      → público
  *
  * La API no guarda sesión: cada petición viaja con su JWT.
  */
@@ -54,6 +59,8 @@ public class ConfiguracionSeguridad {
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/error")
                         .permitAll()
                     .requestMatchers(HttpMethod.GET, "/restaurantes").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/restaurantes/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/platos/*").permitAll()
                     .requestMatchers(HttpMethod.POST, "/restaurantes").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/platos").hasRole("PROPIETARIO")
                     .requestMatchers(HttpMethod.PUT, "/platos/**").hasRole("PROPIETARIO")

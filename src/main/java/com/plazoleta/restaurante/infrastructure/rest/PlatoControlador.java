@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import com.plazoleta.restaurante.application.dto.PeticionRegistrarPlato;
 import com.plazoleta.restaurante.application.dto.RespuestaPlato;
 import com.plazoleta.restaurante.domain.api.AjustarPlato;
 import com.plazoleta.restaurante.domain.api.AlternarPlato;
+import com.plazoleta.restaurante.domain.api.ConsultarPlato;
 import com.plazoleta.restaurante.domain.api.RegistrarPlato;
 import com.plazoleta.restaurante.domain.model.Plato;
 import com.plazoleta.restaurante.infrastructure.security.PortadorAutenticado;
@@ -31,7 +33,8 @@ import jakarta.validation.Valid;
 
 /**
  * Endpoints de la carta: alta de platos (HU3), corrección de precio y
- * descripción (HU4) y habilitación o inhabilitación (HU7). El propietario
+ * descripción (HU4), habilitación o inhabilitación (HU7) y consulta de la
+ * ficha de un plato para la integración con pedidos. El propietario
  * responsable sale del token, nunca de la petición.
  */
 @RestController
@@ -42,15 +45,18 @@ public class PlatoControlador {
     private final RegistrarPlato registrarPlato;
     private final AjustarPlato ajustarPlato;
     private final AlternarPlato alternarPlato;
+    private final ConsultarPlato consultarPlato;
     private final ConversorPlatosRest conversor;
 
     public PlatoControlador(RegistrarPlato registrarPlato,
                             AjustarPlato ajustarPlato,
                             AlternarPlato alternarPlato,
+                            ConsultarPlato consultarPlato,
                             ConversorPlatosRest conversor) {
         this.registrarPlato = registrarPlato;
         this.ajustarPlato = ajustarPlato;
         this.alternarPlato = alternarPlato;
+        this.consultarPlato = consultarPlato;
         this.conversor = conversor;
     }
 
@@ -109,5 +115,18 @@ public class PlatoControlador {
             @Valid @RequestBody PeticionCambiarDisponibilidadPlato peticion) {
         Plato cambiado = alternarPlato.ejecutar(id, peticion.activo(), portador.idUsuario());
         return ResponseEntity.ok(conversor.aRespuesta(cambiado));
+    }
+
+    @Operation(summary = "Consulta la ficha de un plato",
+            description = "Devuelve el plato con su restaurante de origen y su disponibilidad. "
+                    + "Lo consume el microservicio de pedidos para validar los platos de una "
+                    + "orden antes de aceptarla (HU11).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Plato encontrado"),
+            @ApiResponse(responseCode = "404", description = "El plato no existe")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<RespuestaPlato> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(conversor.aRespuesta(consultarPlato.ejecutar(id)));
     }
 }
