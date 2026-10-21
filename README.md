@@ -6,7 +6,8 @@ empleados. Valida los tokens JWT que emite el microservicio de usuarios con el
 secreto compartido y lo consulta por Feign para confirmar propietarios y crear
 cuentas de empleados. Proyecto educativo construido con **Spring Boot 4.1.1** y
 arquitectura hexagonal; cubre las historias de usuario **HU2, HU3, HU4, HU6,
-HU7 y HU9** del reto.
+HU7, HU9 y HU10** del reto, además de las consultas de integración que
+consume el microservicio de pedidos.
 
 ## Endpoints
 
@@ -14,10 +15,14 @@ HU7 y HU9** del reto.
 |---|---|---|---|
 | `POST` | `/restaurantes` | Token **ADMIN** | HU2 · crea un restaurante validando al dueño contra usuarios |
 | `GET` | `/restaurantes?pagina=0&cantidad=10` | Público | HU9 · listado alfabético y paginado (solo nombre y logo) |
+| `GET` | `/restaurantes/{id}` | Público | Integración · ficha del restaurante con su dueño (la usa pedidos en la HU18) |
+| `GET` | `/restaurantes/{id}/platos?categoria=&pagina=&cantidad=` | Público | HU10 · carta del restaurante: solo habilitados, filtrable por categoría |
 | `POST` | `/platos` | Token **PROPIETARIO** | HU3 · agrega un plato a la carta del propio restaurante |
 | `PUT` | `/platos/{id}` | Token **PROPIETARIO** | HU4 · corrige únicamente precio y descripción |
 | `PATCH` | `/platos/{id}/disponibilidad` | Token **PROPIETARIO** | HU7 · habilita o inhabilita un plato propio |
+| `GET` | `/platos/{id}` | Público | Integración · ficha del plato (la usa pedidos para validar sus órdenes) |
 | `POST` | `/empleados` | Token **PROPIETARIO** | HU6 · contrata: crea la cuenta en usuarios (Feign) y guarda el vínculo |
+| `GET` | `/empleados/{idUsuario}` | Autenticado | Integración · restaurante al que pertenece un empleado (lo usa pedidos) |
 
 Las peticiones protegidas viajan con el encabezado `Authorization: Bearer <token>`.
 En las llamadas Feign hacia usuarios el token del solicitante se reenvía tal cual.
